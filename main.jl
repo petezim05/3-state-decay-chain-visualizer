@@ -53,33 +53,33 @@ function main()
     tfinal = params["tfinal"]
 
     #analytical solution
-    t_anal = collect(0.0:0.01:tfinal)
-    NA_anal = populationA.(Na0, λa, t_anal)
-    NB_anal = populationB.(Na0, λa, λb, t_anal)
-    NC_anal = populationC.(Na0, λa, λb, t_anal)
+    t_an = collect(0.0:0.01:tfinal)
+    NA_an = populationA.(Na0, λa, t_an)
+    NB_an = populationB.(Na0, λa, λb, t_an)
+    NC_an = populationC.(Na0, λa, λb, t_an)
 
     #write output
-    write_output("output.txt", t_anal, NA_anal, NB_anal, NC_anal, params)
+    write_output("output.txt", t_an, NA_an, NB_an, NC_an, params)
 
     #PLOT 1: NB convergence — coarse, medium, fine + analytical
     dt_values = [1.0, 0.5, 0.25]
     p1 = plot(title="NB Numerical Convergence",
-              xlabel="Time (h)", ylabel="Population",
+              xlabel="Time (h)", ylabel="Population of B",
               legend=:topright)
 
     for dt in dt_values
         t_num, N = numAprox(Na0, Nb0, Nc0, λa, λb, dt, tfinal)
         plot!(p1, t_num, N[:,2], label="Numerical Δt = $dt h")
     end
-    plot!(p1, t_anal, NB_anal, label="Analytical", linestyle=:dash, linewidth=2, color=:black)
+    plot!(p1, t_an, NB_an, label="Analytical", linestyle=:dash, linewidth=2, color=:black)
     savefig(p1, "plot1_convergence.png")
 
     # PLOT 2: all populations with finest dt
-    t_fine, N_fine = numAprox(Na0, Nb0, Nc0, λa, λb, 0.25, tfinal)
+    t_fine, N_fine = numAprox(Na0, Nb0, Nc0, λa, λb, 0.125, tfinal)
     total = N_fine[:,1] .+ N_fine[:,2] .+ N_fine[:,3]
 
     p2 = plot(t_fine, N_fine[:,1], label="NA",
-              title="Decay Chain Populations (Δt = 0.25 h)",
+              title="Decay Chain Populations (Δt = 0.125 h)",
               xlabel="Time (h)", ylabel="Population", legend=:right)
     plot!(p2, t_fine, N_fine[:,2], label="NB")
     plot!(p2, t_fine, N_fine[:,3], label="NC")
@@ -96,7 +96,7 @@ function main()
         push!(tmax_numerical, t_num[idx])
     end
 
-    tmax_anal = t_max_analytical(λa, λb)
+    tmax_an = t_max_analytical(λa, λb)
     inv_dt = 1.0 ./ dt_list
 
     p3 = scatter(inv_dt, tmax_numerical,
@@ -104,7 +104,7 @@ function main()
                  xlabel="1/Δt (1/h)", ylabel="Time of max NB (h)",
                  title="Convergence of NB Maximum Time",
                  markersize=6)
-    hline!(p3, [tmax_anal], label="Analytical t_max", linestyle=:dash, color=:red)
+    hline!(p3, [tmax_an], label="Analytical t_max", linestyle=:dash, color=:red)
 
     for (x, y, dt) in zip(inv_dt, tmax_numerical, dt_list)
         annotate!(p3, x, y, text("Δt=$(dt)h", :left, 7, :gray30))
