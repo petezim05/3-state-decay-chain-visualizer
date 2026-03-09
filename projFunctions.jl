@@ -24,7 +24,6 @@ function Hl2Dc(hl)
 end
 
 #decay constant to half life
-#may not be nescessary
 Dc2Hl = Hl2Dc
 
 #numerical solution (forward difference aproximation)

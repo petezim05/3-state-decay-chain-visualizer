@@ -102,8 +102,14 @@ function main()
     p3 = scatter(inv_dt, tmax_numerical,
                  label="Numerical t_max",
                  xlabel="1/Δt (1/h)", ylabel="Time of max NB (h)",
-                 title="Convergence of NB Maximum Time")
+                 title="Convergence of NB Maximum Time",
+                 markersize=6)
     hline!(p3, [tmax_anal], label="Analytical t_max", linestyle=:dash, color=:red)
+
+    for (x, y, dt) in zip(inv_dt, tmax_numerical, dt_list)
+        annotate!(p3, x, y, text("Δt=$(dt)h", :left, 7, :gray30))
+    end
+
     savefig(p3, "plot3_tmax.png")
 
     println("Done. Output written to output.txt")
