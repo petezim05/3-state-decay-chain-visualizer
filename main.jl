@@ -65,7 +65,8 @@ function main()
     dt_values = [1.0, 0.5, 0.25]
     p1 = plot(title="NB Numerical Convergence",
               xlabel="Time (h)", ylabel="Population of B",
-              legend=:topright)
+              legend=:topright,
+              xticks=0:5:tfinal, yticks=0:5:100)
 
     for dt in dt_values
         t_num, N = numAprox(Na0, Nb0, Nc0, λa, λb, dt, tfinal)
@@ -80,14 +81,27 @@ function main()
 
     p2 = plot(t_fine, N_fine[:,1], label="NA",
               title="Decay Chain Populations (Δt = 0.125 h)",
-              xlabel="Time (h)", ylabel="Population", legend=:right)
+              xlabel="Time (h)", ylabel="Population", legend=:right,
+              xticks=0:5:tfinal, yticks=0:5:100)
     plot!(p2, t_fine, N_fine[:,2], label="NB")
     plot!(p2, t_fine, N_fine[:,3], label="NC")
     plot!(p2, t_fine, total, label="Total", linestyle=:dash, color=:black)
     savefig(p2, "plot2_populations.png")
 
+    # PLOT 2b: analytical populations
+    total_an = NA_an .+ NB_an .+ NC_an
+
+    p2b = plot(t_an, NA_an, label="NA",
+               title="Decay Chain Populations (Analytical)",
+               xlabel="Time (h)", ylabel="Population", legend=:right,
+               xticks=0:5:tfinal, yticks=0:5:100)
+    plot!(p2b, t_an, NB_an, label="NB")
+    plot!(p2b, t_an, NC_an, label="NC")
+    plot!(p2b, t_an, total_an, label="Total", linestyle=:dash, color=:black)
+    savefig(p2b, "plot2b_populations_analytical.png")
+
     # PLOT 3: t_max NB vs 1/dt, with analytical t_max
-    dt_list = [1.0, 0.5, 0.25, 0.125, 0.0625]
+    dt_list = [ 1.0, 0.5, 0.25, 0.125, 0.0625]
     tmax_numerical = Float64[]
 
     for dt in dt_list
@@ -103,17 +117,25 @@ function main()
                  label="Numerical t_max",
                  xlabel="1/Δt (1/h)", ylabel="Time of max NB (h)",
                  title="Convergence of NB Maximum Time",
-                 markersize=6)
+                 markersize=3,
+                 xlims=(-0.5, 19),
+                 xticks=0:5:20)
     hline!(p3, [tmax_an], label="Analytical t_max", linestyle=:dash, color=:red)
 
-    for (x, y, dt) in zip(inv_dt, tmax_numerical, dt_list)
-        annotate!(p3, x, y, text("Δt=$(dt)h", :left, 7, :gray30))
+    for (i, (x, y, dt)) in enumerate(zip(inv_dt, tmax_numerical, dt_list))
+        if i == 1
+            annotate!(p3, x + 0.4, y, text("Δt=$(dt)h", :left, 7, :gray30))
+        elseif i == length(dt_list)
+            annotate!(p3, x - 0.4, y, text("Δt=$(dt)h", :right, 7, :gray30))
+        else
+            annotate!(p3, x, y - 0.025, text("Δt=$(dt)h", :center, :top, 7, :gray30))
+        end
     end
 
     savefig(p3, "plot3_tmax.png")
 
     println("Done. Output written to output.txt")
-    println("Plots saved: plot1_convergence.png, plot2_populations.png, plot3_tmax.png")
+    println("Plots saved: plot1_convergence.png, plot2_populations.png, plot2b_populations_analytical.png, plot3_tmax.png")
 end
 
 main()
